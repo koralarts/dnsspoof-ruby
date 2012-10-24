@@ -34,7 +34,7 @@ end # arpspoof
 #-----
 # Start Capturing
 #-----
-def sniff(iface)
+def sniff(iface = "em1")
     # Sniff only DNS requests
     filter = "udp and dst port 53"
     pcap = Packetfu::Capture.new(:iface => iface, :start => true, 
@@ -47,7 +47,7 @@ end # sniff
 
 begin
     arp_thread = Thread.new { arpspoof }
-    sniff_thread = Thread.new{ sniff("em1") }
+    sniff_thread = Thread.new{ sniff }
     arp_thread.join
     sniff_thread.join
     rescue Interrupt
