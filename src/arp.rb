@@ -1,12 +1,32 @@
 #!/usr/bin/env ruby
 
 #-------------------------------------------------------------------------------
-# ARP Spoofer Class
+# arp.rb
+#
+# ARP Spoofing Class
+#
+# Author: Karl Castillo
+#
+# Date: October 26, 2012
+#
+# Functions:
+# initialize - initialize the class
+# start - start spoofing
+# stop - stop spoofing
+#
+# Revisions: (Date and Description)
+# 
+# October 26, 2012
+# Removed send and added a super class Spoof
+#
+# Notes:
+#
 #-------------------------------------------------------------------------------
 require 'rubygems'
 require 'packetfu'
+require './spoof.rb'
 
-class ARPSpoof
+class ARPSpoof < Spoof
     
     #---------------------------------------------------------------------------
     # initialize
@@ -15,8 +35,8 @@ class ARPSpoof
     #
     # victim_ip - Victim's IP Address
     # victim_mac - Victim's MAC Address
-    # opcode - ARP Opcode (default = 2)
     # iface - NIC Device (default = "em1")
+    # opcode - ARP Opcode (default = 2)
     # spoof - true to start spoofing, false to not start (default = false)
     #
     # Revisions: (Date and Description)
@@ -68,14 +88,18 @@ class ARPSpoof
     #
     # Send ARP packets to the Victim
     #
+    # packet - packet to be sent
+    #
     # Revisions: (Date and Description)
+    # 
+    # October 26, 2012
+    # Added argument (packet)
     #
     # Notes:
     #---------------------------------------------------------------------------
-    def send
-        @victim_packet.to_w(@interface)
-        @router_packet.to_w(@interface)
-    end # send
+    #def send(packet)
+    #    packet.to_w(@interface)
+    #end # send
     
     #---------------------------------------------------------------------------
     # start
@@ -83,6 +107,9 @@ class ARPSpoof
     # Start ARP poisoning to the target machine
     #
     # Revisions: (Date and Description)
+    #
+    # October 26, 2012
+    # Changed how packet is being sent from send to send(packet)
     #
     # Notes:
     #---------------------------------------------------------------------------
@@ -95,7 +122,8 @@ class ARPSpoof
         `echo 1 > /proc/sys/net/ipv4/ip_forward`
         while(@running)
             sleep 5
-            send
+            send(@victim_packet)
+            send(@router_packet)
         end # while
     end # start
     

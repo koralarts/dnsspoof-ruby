@@ -1,0 +1,31 @@
+================================================================================
+== TODO
+================================================================================
+
+----------------------------
+Date: October 26, 2012
+Due: ASAP
+Done:
+Priority: HIGH
+Title: Test
+----------------------------
+Test in lab. Make a script that uses machine 2 or machine 4 for victims. 
+Use machine 3 to as the attacker.
+
+----------------------------
+Date: October 26, 2012
+Due:
+Done:
+Priority: Optional
+Title: Spoof Google
+----------------------------
+Spoof when the victim sends a DNS request for www.google.com
+
+----------------------------
+Date: October 26, 2012
+Due:
+Done:
+Priority: Optional
+Title: Spoof Twitter
+----------------------------
+Spoof when the victim sends a DNS request for www.twitter.com

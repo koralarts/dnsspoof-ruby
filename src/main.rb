@@ -1,7 +1,15 @@
 #!/usr/bin/env ruby
 
 #-------------------------------------------------------------------------------
-# Sniffer.rb
+# main.rb
+#
+# Author: Karl Castillo
+#
+# Date: October 26, 2012
+#
+# Revisions: (Date and Description)
+#
+# Notes:
 #-------------------------------------------------------------------------------
 require 'rubygems'
 require 'packetfu'
@@ -38,10 +46,13 @@ end # Trollop
 # Check if user is running as root
 raise "Must run as root or `sudo ruby #{$0}`" unless Process.uid == 0
 
+#------
+# Start Spoofing!
+#------
 begin
     # Create necessary objects
-    arp = ARPSpoof.new(opt[:host], opt[:mac], opt[:gate], opt[:iface])
-    dns = DNSSpoof.new(opt[:spoof], opt[:host], opt[:mac], opt[:iface])
+    arp = ARPSpoof.new(opts[:host], opts[:mac], opts[:gate], opts[:iface])
+    dns = DNSSpoof.new(opts[:spoof], opts[:host], opts[:mac], opts[:iface])
     arp_thread = Thread.new { arp.start }
     dns_thread = Thread.new{ dns.start }
     
