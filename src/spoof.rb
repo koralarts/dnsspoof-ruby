@@ -21,7 +21,7 @@ require 'rubygems'
 require 'packetfu'
 
 class Spoof
-    
+
     def send(packet)
         packet.to_w(@interface)
     end
