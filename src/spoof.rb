@@ -22,8 +22,8 @@ require 'packetfu'
 
 class Spoof
 
-    def send(packet)
-        packet.to_w(@interface)
+    def send(packet, interface)
+        packet.to_w(interface)
     end
     
 end # spoofer
