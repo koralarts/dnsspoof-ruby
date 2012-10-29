@@ -67,7 +67,7 @@ class ARPSpoof < Spoof
         @victim_packet.arp_saddr_ip = gateway
         @victim_packet.arp_daddr_ip = victim_ip
         @victim_packet.arp_opcode = opcode
-        
+
         @router_packet.eth_saddr = cfg[:eth_saddr]
         @router_packet.eth_daddr = cfg[:eth_daddr]
         @router_packet.arp_saddr_mac = cfg[:eth_saddr]
