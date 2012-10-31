@@ -74,6 +74,8 @@ class DNSSpoof < Spoof
         
         # Only capture DNS packets
         filter = "udp and port 53 and src " + @victim_ip
+        
+        puts "Filter: " + filter
                 
         cap = PacketFu::Capture.new(:iface => @iface, :start => true,
                         :promisc => true, :filter => filter, :save => true)

