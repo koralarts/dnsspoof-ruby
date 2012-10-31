@@ -50,7 +50,6 @@ end # Trollop
 raise "Must run as root or `sudo ruby #{$0}`" unless Process.uid == 0
 
 # Enable IP forwarding
-`echo 1 > /proc/sys/net/ipv4/ip_forward`
 
 #------
 # Start Spoofing!

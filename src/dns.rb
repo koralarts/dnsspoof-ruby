@@ -82,26 +82,29 @@ class DNSSpoof < Spoof
         
         # Start packet sniffing
         cap.stream.each do |pkt|
-            @packet = PacketFu::Packet.parse(pkt)
      
-            dnsquery = @packet.payload[2].unpack('h*')[0].chr + \
-                       @packet.payload[3].unpack('h*')[0].chr
-            
-            # Check if Query
-            if dnsquery == '10' then
-                @domain_name = get_domain(@packet.payload[12..-1])
+            if PacketFu::UDPPacket.can_parse?(pkt) then
+                @packet = PacketFu::Packet.parse(pkt)
+         
+                dnsquery = @packet.payload[2].unpack('h*')[0].chr + \
+                           @packet.payload[3].unpack('h*')[0].chr
                 
-                # Check if domain name field is empty
-                if @domain_name.nil? then
-                    puts "Empty domain name field"
-                    next
-                end # @domain_name.nil?
-                
-                puts "Domain name: #{@domain_name}"
-                
-		        send_response
-                
-            end # dnsquery == '10' then
+                # Check if Query
+                if dnsquery == '10' then
+                    @domain_name = get_domain(@packet.payload[12..-1])
+                    
+                    # Check if domain name field is empty
+                    if @domain_name.nil? then
+                        puts "Empty domain name field"
+                        next
+                    end # @domain_name.nil?
+                    
+                    puts "Domain name: #{@domain_name}"
+                    
+		            send_response
+                    
+                end # dnsquery == '10' then
+            end # if pkt.canparse? then
         end # cap stream.each do |pkt|
     end # start
     
